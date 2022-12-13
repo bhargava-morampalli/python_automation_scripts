@@ -3,13 +3,10 @@
 import fire
 import pandas as pd
 import cudf
-import dask_cudf
-from numba import jit, cuda
 
 
 ## define function to generalize the CSV generation for ROC curve generation for 16s rRNA
 
-@cuda.jit
 def roc(filename, w):
     # read in the output file from nanodoc analysis for 16s rRNA
     
