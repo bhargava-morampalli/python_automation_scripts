@@ -1,23 +1,22 @@
-## import libraries
-
 import fire
-import pandas as pd
 import cudf
-
+import numpy as np
+import cupy
 
 ## define function to generalize the CSV generation for ROC curve generation for 16s rRNA
 
 def roc(filename, w):
+
     # read in the output file from nanodoc analysis for 16s rRNA
     
     nanodoc_16s = cudf.read_csv(filename, sep='\t')
     nanodoc_16s.columns = ['position', '5mer', 'depth_tgt', 'depth_ref', 'med_current', 'mad_current', 'med_currentR', 'mad_currentR', 'current_ratio', 'scoreSide1', 'scoreSide2', 'score']
 
     ## calculate values for ROC for 16s rRNA - add mods column with either yes for known modifications or no for all other positions
-
-    known_mods_16s = [716, 727, 1166, 1167, 1407, 1602, 1607, 1698, 1716, 1718, 1719]
-    known_mods_16s_pos = [x+w for x in known_mods_16s]
-    known_mods_16s_neg = [x-w for x in known_mods_16s]
+    
+    known_mods_16s = np.array([716, 727, 1166, 1167, 1407, 1602, 1607, 1698, 1716, 1718, 1719])
+    known_mods_16s_pos = cupy.asarray(known_mods_16s) + w
+    known_mods_16s_neg = cupy.asarray(known_mods_16s) - w
 
     def conditions_16s(a):
         if a in (known_mods_16s + known_mods_16s_pos + known_mods_16s_neg):
@@ -33,7 +32,7 @@ def roc(filename, w):
 
     ## calculate variables required for ROC visualization
 
-    thresholds = list(abs(sorted_16s['score']))
+    thresholds = cupy.array(list(abs(sorted_16s['score'])))
 
     roc_point = []
 

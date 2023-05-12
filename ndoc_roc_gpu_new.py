@@ -2,20 +2,21 @@
 
 import fire
 import pandas as pd
-import cudf
-
+import numpy as np
+import numba
 
 ## define function to generalize the CSV generation for ROC curve generation for 16s rRNA
 
+@numba.njit(nopython=True)
 def roc(filename, w):
     # read in the output file from nanodoc analysis for 16s rRNA
     
-    nanodoc_16s = cudf.read_csv(filename, sep='\t')
+    nanodoc_16s = pd.read_csv(filename, sep='\t')
     nanodoc_16s.columns = ['position', '5mer', 'depth_tgt', 'depth_ref', 'med_current', 'mad_current', 'med_currentR', 'mad_currentR', 'current_ratio', 'scoreSide1', 'scoreSide2', 'score']
 
     ## calculate values for ROC for 16s rRNA - add mods column with either yes for known modifications or no for all other positions
 
-    known_mods_16s = [716, 727, 1166, 1167, 1407, 1602, 1607, 1698, 1716, 1718, 1719]
+    known_mods_16s = tuple([716, 727, 1166, 1167, 1407, 1602, 1607, 1698, 1716, 1718, 1719])
     known_mods_16s_pos = [x+w for x in known_mods_16s]
     known_mods_16s_neg = [x-w for x in known_mods_16s]
 
@@ -73,7 +74,7 @@ def roc(filename, w):
 
     ## write out ROC values into a dataframe
 
-    pivot = cudf.DataFrame(roc_point, columns=["tpr", "fpr"])
+    pivot = pd.DataFrame(roc_point, columns=["tpr", "fpr"])
     pivot["threshold"] = thresholds
     pivot.to_csv(filename + "_roc_" + str(w) + "nt_window.tsv")
     

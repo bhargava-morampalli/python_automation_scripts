@@ -3,13 +3,6 @@
 import fire
 import pandas as pd
 import numpy as np
-import time
-
-# Measure time taken by program to execute.
-import time
-
-# starting time
-begin = time.time()
 
 ## define function to generalize the CSV generation for ROC curve generation for 16s rRNA
 
@@ -84,13 +77,6 @@ def roc(filename, w):
     pivot.to_csv(filename + "_roc_" + str(w) + "nt_window.tsv")
     
     return
-
-time.sleep(1)
-# store end time
-end = time.time()
-
-# total time taken
-print(f"Total runtime of the program is {end - begin}")
 
 if __name__ == '__main__':
   fire.Fire(roc)

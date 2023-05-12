@@ -1,8 +1,8 @@
 ## import libraries
 
 import fire
-import pandas as pd
 import cudf
+import cupy
 
 
 ## define function to generalize the CSV generation for ROC curve generation for 16s rRNA
@@ -33,12 +33,11 @@ def roc(filename, w):
 
     ## calculate variables required for ROC visualization
 
-    thresholds = list(abs(sorted_16s['score']))
+    thresholds = cupy.array(list(abs(sorted_16s['score'])))
 
     roc_point = []
 
     for threshold in thresholds:
-            
         tp = 0; fp = 0; fn = 0; tn = 0
 
         for index, instance in sorted_16s.iterrows():
@@ -74,8 +73,8 @@ def roc(filename, w):
     ## write out ROC values into a dataframe
 
     pivot = cudf.DataFrame(roc_point, columns=["tpr", "fpr"])
-    pivot["threshold"] = thresholds
-    pivot.to_csv(filename + "_roc_" + str(w) + "nt_window.tsv")
+    pivot["threshold"] = thresholds.to_array()
+    pivot.to_csv(filename + "_roc_" + str(w) + "nt_window.tsv", index=False)
     
     return
 
